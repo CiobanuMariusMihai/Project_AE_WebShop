@@ -46,18 +46,18 @@ namespace Project_AE_WebShop.Services
         }
 
 
-        public async Task<bool> UpdateBasketAsync(Basket basket)
+        public async Task<bool> UpdateBasketAsync(int basketId, List<Order> orders)
         {
-            var dbBasket = _context.Baskets.Include(b => b.Orders).ThenInclude(o => o.Product).FirstOrDefault(b => b.Id == basket.Id);
-                
-            dbBasket.Price = basket.Price;
-            foreach (var order in basket.Orders)
+            var dbBasket = _context.Baskets.Include(b => b.Orders).ThenInclude(o => o.Product).FirstOrDefault(b => b.Id == basketId);
+
+            dbBasket.Price = orders.Sum(o => o.Quantity <= 0 ? 0 : o.Price * o.Quantity);
+            foreach (var order in orders)
             {
                 var orderMatch = dbBasket.Orders.FirstOrDefault(o => o.ProductId == order.ProductId);
-                
-                if(orderMatch != null)
+
+                if (orderMatch != null)
                 {
-                    if(order.Quantity <= 0)
+                    if (order.Quantity <= 0)
                     {
                         _context.Orders.Remove(orderMatch);
                         continue;
@@ -69,7 +69,7 @@ namespace Project_AE_WebShop.Services
                 {
                     if (order.Quantity <= 0) continue;
                     var dbProduct = _context.Products.FirstOrDefault(o => o.Id == order.ProductId);
-                        
+
                     if (dbProduct == null)
                     {
                         await _context.Products.AddAsync(order.Product);
@@ -82,7 +82,7 @@ namespace Project_AE_WebShop.Services
                             Product = dbProduct,
                             Quantity = 1,
                             Price = dbProduct.Price * 1,
-                            BasketId = basket.Id,
+                            BasketId = basketId
                         };
                         await _context.Orders.AddAsync(newOrder);
                     }
@@ -92,7 +92,10 @@ namespace Project_AE_WebShop.Services
             return await _context.SaveChangesAsync() > 0;
         }
 
-
+        public async Task<List<Order>> GetOrdersAsync()
+        {
+            return await _context.Orders.ToListAsync();
+        }
         public async Task<bool> DeleteBasketAsync(int basketId)
         {
             var basket = _context.Baskets.Include(b=> b.Orders).FirstOrDefault(b => b.Id == basketId);

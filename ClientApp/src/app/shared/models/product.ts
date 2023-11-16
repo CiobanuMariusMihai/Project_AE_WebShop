@@ -16,6 +16,7 @@ export interface Order{
     quantity: number;
     price: number;
     basketId: number;
+    basket: Basket
 }
 
 export interface Basket{

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment.development';
 import { Basket, Order, Product } from '../shared/models/product';
@@ -51,7 +51,7 @@ export class ShopService {
 
       this.basket.price += product.price;
       this.updateBasket().subscribe({
-        next: _=>{}
+        next: _ =>{} 
       })
   }
 
@@ -109,6 +109,7 @@ export class ShopService {
   }
   
   updateBasket(){
-    return this.http.post(`${environment.appUrl}/api/shop/update-basket`, this.basket)
+    console.log(this.basket?.orders)
+    return this.http.post(`${environment.appUrl}/api/shop/update-basket?basketId=` + this.basket?.id, this.basket?.orders)
   }
 }

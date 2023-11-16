@@ -33,6 +33,7 @@ export class ShopComponent implements OnInit {
   }
 
   addToBasket(product: Product){
+    console.log(product)
     this.shopService.addToBasket(product);
   }
 

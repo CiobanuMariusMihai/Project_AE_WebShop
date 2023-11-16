@@ -34,10 +34,26 @@ namespace Project_AE_WebShop.Controllers
         }
 
         [HttpPost("update-basket")]
-        public async Task<IActionResult> UpdateBasket([FromBody] Basket basket)
+        public async Task<IActionResult> UpdateBasket([FromQuery] int basketId, [FromBody] List<Orderdto> ordersdto)
         {
-            if (await _productService.UpdateBasketAsync(basket))
-                return Ok(basket);
+            var orders = new List<Order>();
+            var dbOrders = await _productService.GetOrdersAsync();
+            foreach (var orderdto in ordersdto)
+            {
+                var order = new Order
+                {
+                    BasketId = basketId,
+                    Price = orderdto.Price,
+                    Quantity = orderdto.Quantity,
+                    Product = orderdto.Product,
+                    ProductId = orderdto.ProductId,
+                    Id = dbOrders.FirstOrDefault(o => o.ProductId == orderdto.ProductId)?.Id ?? 0,
+                };
+                orders.Add(order);
+                
+            }
+            if (await _productService.UpdateBasketAsync(basketId, orders))
+                return Ok();
 
             return BadRequest();
         }

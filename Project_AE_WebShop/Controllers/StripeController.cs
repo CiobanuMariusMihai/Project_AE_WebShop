@@ -24,7 +24,7 @@ public class CheckoutController : ControllerBase
     }
 
     [HttpPost("checkout")]
-    public async Task<ActionResult> CheckoutOrder([FromBody] Basket basket, [FromServices] IServiceProvider sp)
+    public async Task<ActionResult> CheckoutOrder([FromQuery] int basketId, [FromQuery] Guid userId, [FromQuery] double price, [FromServices] IServiceProvider sp)
     {
         var referer = Request.Headers.Referer;
         s_wasmClientURL = referer[0];
@@ -42,7 +42,7 @@ public class CheckoutController : ControllerBase
 
         if (thisApiUrl is not null)
         {
-            var sessionId = await CheckOut(basket, thisApiUrl);
+            var sessionId = await CheckOut(basketId, userId, price, thisApiUrl);
             var pubKey = _configuration["Stripe:PubKey"];
 
             var checkoutOrderResponse = new CheckoutBasketResponse()
@@ -60,7 +60,7 @@ public class CheckoutController : ControllerBase
     }
 
     [NonAction]
-    public async Task<string> CheckOut(Basket basket, string thisApiUrl)
+    public async Task<string> CheckOut( int basketId, Guid userId, double price, string thisApiUrl)
     {
         // Create a payment flow from the items in the cart.
         // Gets sent to Stripe API.
@@ -79,12 +79,12 @@ public class CheckoutController : ControllerBase
                 {
                     PriceData = new SessionLineItemPriceDataOptions
                     {
-                        UnitAmount = (long?)basket.Price*100, // Price is in USD cents.
+                        UnitAmount = (long?)price*100, // Price is in USD cents.
                         Currency = "RON",
                         ProductData = new SessionLineItemPriceDataProductDataOptions
                         {
-                            Name = "Basket_"+basket.Id.ToString(),
-                            Description = "User_"+basket.UserId.ToString()
+                            Name = "Basket_"+basketId.ToString(),
+                            Description = "User_"+userId.ToString()
                         },
                     },
                     Quantity = 1,

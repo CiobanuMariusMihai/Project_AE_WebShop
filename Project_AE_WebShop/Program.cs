@@ -9,9 +9,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Stripe;
-using Project_AE_WebShop.Data;
-using Project_AE_WebShop.Models;
-using Project_AE_WebShop.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
